@@ -1,23 +1,45 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sperm Sprint</title>
+    <title>Sperm Race</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        canvas { display: block; }
-        @keyframes pulse-glow {
-            0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 100, 100, 0.5)); }
-            50% { filter: drop-shadow(0 0 20px rgba(255, 100, 100, 0.8)); }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
         }
-        .pulse-text { animation: pulse-glow 2s infinite; }
+
+        canvas {
+            display: block;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 5px rgba(255, 100, 100, 0.5));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 100, 100, 0.8));
+            }
+        }
+
+        .pulse-text {
+            animation: pulse-glow 2s infinite;
+        }
     </style>
 </head>
+
 <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

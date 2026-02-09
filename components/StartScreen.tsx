@@ -13,7 +13,7 @@ export const StartScreen: React.FC<Props> = ({ onStart, playerName, onNameChange
     <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/80 backdrop-blur-md">
       <div className="max-w-md text-center p-8 border border-red-900/50 rounded-3xl bg-gradient-to-b from-red-950/20 to-black shadow-[0_0_50px_rgba(153,27,27,0.3)]">
         <h1 className="text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-white pulse-text italic">
-          SPERM SPRINT
+          SPERM RACE
         </h1>
 
         {/* Player Identity Input */}
