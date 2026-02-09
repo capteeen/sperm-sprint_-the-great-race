@@ -9,6 +9,7 @@ import { CompetitorSperm } from './CompetitorSperm';
 import { ObstacleItem } from './Obstacle';
 import { GameState, Competitor, Obstacle, ZoneType } from '../types';
 import { getRandomNames } from '../data/names';
+import { getInputState } from '../utils/inputManager';
 
 interface Props {
   gameState: GameState;
@@ -16,7 +17,7 @@ interface Props {
   onFinish: () => void;
 }
 
-const RACE_LENGTH = 1200; // Extended for a full map
+const RACE_LENGTH = 1200;
 const TAP_COOLDOWN = 140;
 const FRICTION = 0.985;
 const MAX_VEL = 1.3;
@@ -33,14 +34,12 @@ const getZoneFromDistance = (dist: number): ZoneType => {
 const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const lastTapRef = useRef<number>(0);
-  const steerRef = useRef<number>(0);
   const playerXRef = useRef<number>(0);
   const playerYRef = useRef<number>(0);
+  const lastProcessedTapRef = useRef<number>(0);
   const { camera } = useThree();
 
   useEffect(() => {
-    // Generate competitors with random names
     const randomNames = getRandomNames(15);
     const initialComps = Array.from({ length: 15 }).map((_, i) => ({
       id: `comp-${i}`,
@@ -52,15 +51,14 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     }));
     setCompetitors(initialComps);
 
-    // Generate Map Obstacles based on zones
     const obs: Obstacle[] = [];
     for (let i = 50; i < RACE_LENGTH; i += 35) {
       const zone = getZoneFromDistance(i);
       let size = 0.8 + Math.random() * 1.5;
       let density = 1;
 
-      if (zone === 'cervix') size *= 1.8; // Huge barriers in cervix
-      if (zone === 'uterus') density = 2; // More obstacles in uterus
+      if (zone === 'cervix') size *= 1.8;
+      if (zone === 'uterus') density = 2;
 
       for (let j = 0; j < density; j++) {
         obs.push({
@@ -81,99 +79,42 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
   const velocityRef = useRef(gameState.velocity);
   const rhythmRef = useRef(gameState.rhythmScore);
 
-  // Keep refs in sync
   useEffect(() => {
     velocityRef.current = gameState.velocity;
     rhythmRef.current = gameState.rhythmScore;
   }, [gameState.velocity, gameState.rhythmScore]);
 
-  useEffect(() => {
-    const isForwardKey = (e: KeyboardEvent) => {
-      // Check both e.code and e.key for cross-browser compatibility
-      const code = e.code || '';
-      const key = e.key || '';
-      return ['Space', 'ArrowUp', 'KeyW'].includes(code) ||
-        [' ', 'ArrowUp', 'w', 'W'].includes(key) ||
-        e.keyCode === 32 || e.keyCode === 38 || e.keyCode === 87;
-    };
-
-    const isLeftKey = (e: KeyboardEvent) => {
-      const code = e.code || '';
-      const key = e.key || '';
-      return ['ArrowLeft', 'KeyA'].includes(code) ||
-        ['ArrowLeft', 'a', 'A'].includes(key) ||
-        e.keyCode === 37 || e.keyCode === 65;
-    };
-
-    const isRightKey = (e: KeyboardEvent) => {
-      const code = e.code || '';
-      const key = e.key || '';
-      return ['ArrowRight', 'KeyD'].includes(code) ||
-        ['ArrowRight', 'd', 'D'].includes(key) ||
-        e.keyCode === 39 || e.keyCode === 68;
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Skip if user is typing in an input field
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      if (isForwardKey(e)) {
-        e.preventDefault();
-        e.stopPropagation();
-        const now = Date.now();
-        if (now - lastTapRef.current > TAP_COOLDOWN) {
-          const diff = now - lastTapRef.current;
-          let multiplier = 1.0;
-          if (diff > 350 && diff < 550) {
-            multiplier = 2.0;
-            onUpdate({ rhythmScore: Math.min(100, rhythmRef.current + 12) });
-          } else {
-            onUpdate({ rhythmScore: Math.max(0, rhythmRef.current - 6) });
-          }
-          onUpdate({ velocity: Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier) });
-          lastTapRef.current = now;
-        }
-        return false;
-      }
-      if (isLeftKey(e)) {
-        e.preventDefault();
-        steerRef.current = -1;
-        return false;
-      }
-      if (isRightKey(e)) {
-        e.preventDefault();
-        steerRef.current = 1;
-        return false;
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (isLeftKey(e) || isRightKey(e)) steerRef.current = 0;
-    };
-
-    // Use document with capture phase and passive: false for Chrome compatibility
-    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
-    document.addEventListener('keyup', handleKeyUp, { capture: true, passive: false });
-
-    // Also add to window as fallback
-    window.addEventListener('keydown', handleKeyDown, { passive: false });
-    window.addEventListener('keyup', handleKeyUp, { passive: false });
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, { capture: true });
-      document.removeEventListener('keyup', handleKeyUp, { capture: true });
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [onUpdate]);
-
-  useFrame((state) => {
+  useFrame(() => {
     if (!gameState.isRacing) return;
 
+    // Get input from global input manager (outside R3F)
+    const input = getInputState();
+
+    // Handle steering from global input
+    let steer = 0;
+    if (input.left) steer = -1;
+    if (input.right) steer = 1;
+
+    // Handle forward boost from global input
+    if (input.forward && input.lastTap > lastProcessedTapRef.current) {
+      const now = input.lastTap;
+      const diff = now - lastProcessedTapRef.current;
+
+      if (diff > TAP_COOLDOWN) {
+        let multiplier = 1.0;
+        if (diff > 350 && diff < 550) {
+          multiplier = 2.0;
+          onUpdate({ rhythmScore: Math.min(100, rhythmRef.current + 12) });
+        } else {
+          onUpdate({ rhythmScore: Math.max(0, rhythmRef.current - 6) });
+        }
+        onUpdate({ velocity: Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier) });
+        lastProcessedTapRef.current = now;
+      }
+    }
+
     // Movement
-    playerXRef.current += steerRef.current * 0.18;
+    playerXRef.current += steer * 0.18;
     playerXRef.current *= 0.95;
     playerYRef.current = Math.sin(gameState.distance * 0.04) * 0.6;
 
@@ -193,10 +134,8 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       }
     }
 
-    // Zone Transition
     const currentZone = getZoneFromDistance(newDist);
 
-    // Camera: "Up View"
     const camTargetX = playerXRef.current * 0.5;
     const camTargetY = playerYRef.current + 6;
     const camTargetZ = -newDist + 10;
@@ -204,7 +143,6 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     camera.position.lerp(new THREE.Vector3(camTargetX, camTargetY, camTargetZ), 0.1);
     camera.lookAt(playerXRef.current, playerYRef.current, -newDist - 8);
 
-    // Update State
     const updatedComps = competitors.map(c => ({
       ...c,
       distance: c.distance + c.velocity + (Math.random() * 0.06),
@@ -222,7 +160,7 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       rank: myRank + 99999980,
       currentZone,
       competitors: updatedComps,
-      raceTime: gameState.raceTime + 0.016, // ~60fps
+      raceTime: gameState.raceTime + 0.016,
     });
 
     if (newDist > RACE_LENGTH) onFinish();
@@ -266,7 +204,6 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
         )
       ))}
 
-      {/* The Goal: Massive Egg */}
       <mesh position={[0, 0, -RACE_LENGTH - 25]}>
         <sphereGeometry args={[22, 64, 64]} />
         <meshStandardMaterial
@@ -285,7 +222,6 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
 export const Game: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-focus the container when the game starts to ensure keyboard events work
   useEffect(() => {
     const focusContainer = () => {
       if (containerRef.current) {
@@ -293,12 +229,10 @@ export const Game: React.FC<Props> = (props) => {
       }
     };
 
-    // Focus immediately and after a short delay (for production builds with async loading)
     focusContainer();
     const timer1 = setTimeout(focusContainer, 100);
     const timer2 = setTimeout(focusContainer, 500);
 
-    // Also focus when window regains focus
     window.addEventListener('focus', focusContainer);
 
     return () => {
