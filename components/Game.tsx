@@ -90,18 +90,27 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
   useEffect(() => {
     const isForwardKey = (e: KeyboardEvent) => {
       // Check both e.code and e.key for cross-browser compatibility
-      return ['Space', 'ArrowUp', 'KeyW'].includes(e.code) ||
-        [' ', 'ArrowUp', 'w', 'W'].includes(e.key);
+      const code = e.code || '';
+      const key = e.key || '';
+      return ['Space', 'ArrowUp', 'KeyW'].includes(code) ||
+        [' ', 'ArrowUp', 'w', 'W'].includes(key) ||
+        e.keyCode === 32 || e.keyCode === 38 || e.keyCode === 87;
     };
 
     const isLeftKey = (e: KeyboardEvent) => {
-      return ['ArrowLeft', 'KeyA'].includes(e.code) ||
-        ['ArrowLeft', 'a', 'A'].includes(e.key);
+      const code = e.code || '';
+      const key = e.key || '';
+      return ['ArrowLeft', 'KeyA'].includes(code) ||
+        ['ArrowLeft', 'a', 'A'].includes(key) ||
+        e.keyCode === 37 || e.keyCode === 65;
     };
 
     const isRightKey = (e: KeyboardEvent) => {
-      return ['ArrowRight', 'KeyD'].includes(e.code) ||
-        ['ArrowRight', 'd', 'D'].includes(e.key);
+      const code = e.code || '';
+      const key = e.key || '';
+      return ['ArrowRight', 'KeyD'].includes(code) ||
+        ['ArrowRight', 'd', 'D'].includes(key) ||
+        e.keyCode === 39 || e.keyCode === 68;
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -111,7 +120,7 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       }
 
       if (isForwardKey(e)) {
-        e.preventDefault(); // Prevent page scrolling
+        e.preventDefault();
         e.stopPropagation();
         const now = Date.now();
         if (now - lastTapRef.current > TAP_COOLDOWN) {
@@ -126,14 +135,17 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
           onUpdate({ velocity: Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier) });
           lastTapRef.current = now;
         }
+        return false;
       }
       if (isLeftKey(e)) {
         e.preventDefault();
         steerRef.current = -1;
+        return false;
       }
       if (isRightKey(e)) {
         e.preventDefault();
         steerRef.current = 1;
+        return false;
       }
     };
 
@@ -141,12 +153,19 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       if (isLeftKey(e) || isRightKey(e)) steerRef.current = 0;
     };
 
-    // Use document with capture phase for more reliable event handling
-    document.addEventListener('keydown', handleKeyDown, { capture: true });
-    document.addEventListener('keyup', handleKeyUp, { capture: true });
+    // Use document with capture phase and passive: false for Chrome compatibility
+    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+    document.addEventListener('keyup', handleKeyUp, { capture: true, passive: false });
+
+    // Also add to window as fallback
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    window.addEventListener('keyup', handleKeyUp, { passive: false });
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
       document.removeEventListener('keyup', handleKeyUp, { capture: true });
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [onUpdate]);
 
