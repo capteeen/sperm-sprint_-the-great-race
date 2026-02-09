@@ -64,11 +64,7 @@ export const StartScreen: React.FC<Props> = ({ onStart, playerName, onNameChange
         </button>
       </div>
 
-      <div className="mt-8 flex gap-4 text-gray-500">
-        <div className="flex items-center gap-1 text-xs uppercase tracking-widest">
-          <Info size={14} /> Powered by Gemini AI Announcer
-        </div>
-      </div>
+
 
       <style>{`
         @keyframes shimmer {
