@@ -88,8 +88,24 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
   }, [gameState.velocity, gameState.rhythmScore]);
 
   useEffect(() => {
+    const isForwardKey = (e: KeyboardEvent) => {
+      // Check both e.code and e.key for cross-browser compatibility
+      return ['Space', 'ArrowUp', 'KeyW'].includes(e.code) ||
+        [' ', 'ArrowUp', 'w', 'W'].includes(e.key);
+    };
+
+    const isLeftKey = (e: KeyboardEvent) => {
+      return ['ArrowLeft', 'KeyA'].includes(e.code) ||
+        ['ArrowLeft', 'a', 'A'].includes(e.key);
+    };
+
+    const isRightKey = (e: KeyboardEvent) => {
+      return ['ArrowRight', 'KeyD'].includes(e.code) ||
+        ['ArrowRight', 'd', 'D'].includes(e.key);
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
+      if (isForwardKey(e)) {
         e.preventDefault(); // Prevent page scrolling
         const now = Date.now();
         if (now - lastTapRef.current > TAP_COOLDOWN) {
@@ -105,12 +121,12 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
           lastTapRef.current = now;
         }
       }
-      if (['ArrowLeft', 'KeyA'].includes(e.code)) steerRef.current = -1;
-      if (['ArrowRight', 'KeyD'].includes(e.code)) steerRef.current = 1;
+      if (isLeftKey(e)) steerRef.current = -1;
+      if (isRightKey(e)) steerRef.current = 1;
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (['ArrowLeft', 'KeyA', 'ArrowRight', 'KeyD'].includes(e.code)) steerRef.current = 0;
+      if (isLeftKey(e) || isRightKey(e)) steerRef.current = 0;
     };
 
     window.addEventListener('keydown', handleKeyDown);
