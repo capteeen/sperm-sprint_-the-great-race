@@ -78,20 +78,30 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     setObstacles(obs);
   }, []);
 
+  const velocityRef = useRef(gameState.velocity);
+  const rhythmRef = useRef(gameState.rhythmScore);
+
+  // Keep refs in sync
+  useEffect(() => {
+    velocityRef.current = gameState.velocity;
+    rhythmRef.current = gameState.rhythmScore;
+  }, [gameState.velocity, gameState.rhythmScore]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
+        e.preventDefault(); // Prevent page scrolling
         const now = Date.now();
         if (now - lastTapRef.current > TAP_COOLDOWN) {
           const diff = now - lastTapRef.current;
           let multiplier = 1.0;
           if (diff > 350 && diff < 550) {
             multiplier = 2.0;
-            onUpdate({ rhythmScore: Math.min(100, gameState.rhythmScore + 12) });
+            onUpdate({ rhythmScore: Math.min(100, rhythmRef.current + 12) });
           } else {
-            onUpdate({ rhythmScore: Math.max(0, gameState.rhythmScore - 6) });
+            onUpdate({ rhythmScore: Math.max(0, rhythmRef.current - 6) });
           }
-          onUpdate({ velocity: Math.min(MAX_VEL, gameState.velocity + ACCEL * multiplier) });
+          onUpdate({ velocity: Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier) });
           lastTapRef.current = now;
         }
       }
@@ -109,7 +119,7 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState.velocity, gameState.rhythmScore, onUpdate]);
+  }, [onUpdate]);
 
   useFrame((state) => {
     if (!gameState.isRacing) return;
