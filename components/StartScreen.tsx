@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Info } from 'lucide-react';
+import { Play } from 'lucide-react';
 
 interface Props {
   onStart: () => void;
@@ -10,67 +10,66 @@ interface Props {
 
 export const StartScreen: React.FC<Props> = ({ onStart, playerName, onNameChange }) => {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/80 backdrop-blur-md">
-      <div className="max-w-md text-center p-8 border border-red-900/50 rounded-3xl bg-gradient-to-b from-red-950/20 to-black shadow-[0_0_50px_rgba(153,27,27,0.3)]">
-        <h1 className="text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-white pulse-text italic">
-          SPERM RACE
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-center z-50"
+      style={{
+        backgroundImage: 'url(/assets/biological_bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/70" />
+
+      <div className="relative z-10 w-full max-w-lg text-center p-10">
+        {/* Title */}
+        <h1 className="text-7xl font-extrabold mb-2 tracking-tight text-white drop-shadow-[0_0_35px_rgba(180,50,100,0.7)]">
+          SPERM
+        </h1>
+        <h1 className="text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-rose-400 mb-8 drop-shadow-[0_0_35px_rgba(180,50,100,0.7)]">
+          RACE
         </h1>
 
         {/* Player Identity Input */}
-        <div className="mb-6 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl group focus-within:border-cyan-500/50 transition-all duration-300">
-          <label className="text-[10px] text-cyan-500/50 uppercase tracking-[0.2em] block mb-2 font-bold">Your Bio-Identity</label>
+        <div className="mb-8 p-5 bg-black/50 border border-pink-900/40 rounded-2xl backdrop-blur-sm">
+          <label className="text-[11px] text-pink-400/70 uppercase tracking-[0.25em] block mb-3 font-bold">
+            Your Swimmer Name
+          </label>
           <input
             type="text"
             value={playerName}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full bg-transparent text-2xl font-black text-cyan-400 text-center outline-none placeholder:text-cyan-900/30 selection:bg-cyan-500/30"
+            className="w-full bg-transparent text-3xl font-bold text-pink-300 text-center outline-none placeholder:text-pink-900/50 focus:text-white transition-colors"
             placeholder="Enter Name..."
             maxLength={20}
           />
-          <div className="h-px w-0 group-focus-within:w-full bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent transition-all duration-500 mt-2 mx-auto" />
         </div>
 
-        <p className="text-gray-400 mb-8 text-lg">
-          Outswim 99 million competitors in a pulse-pounding biological race. Only the fastest survives.
-        </p>
-
-        <div className="space-y-4 mb-8 text-left bg-black/40 p-4 rounded-xl border border-white/5">
-          <div className="flex items-start gap-3">
-            <div className="p-1 bg-red-500 rounded-md mt-1">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-            </div>
-            <div>
-              <p className="font-bold text-white">RHYTHM MECHANIC</p>
-              <p className="text-sm text-gray-400">Tap <span className="text-red-400 font-mono">[SPACE]</span> or <span className="text-red-400 font-mono">[UP]</span> to the beat to gain massive momentum.</p>
-            </div>
+        {/* Game Instructions */}
+        <div className="grid grid-cols-2 gap-4 mb-10">
+          <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-left">
+            <p className="text-xs font-bold text-pink-400 uppercase mb-1">Boost</p>
+            <p className="text-sm text-gray-400">
+              Tap <span className="text-white font-mono bg-white/10 px-1 rounded">SPACE</span> rhythmically
+            </p>
           </div>
-          <div className="flex items-start gap-3">
-            <div className="p-1 bg-blue-500 rounded-md mt-1">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-            </div>
-            <div>
-              <p className="font-bold text-white">STEERING</p>
-              <p className="text-sm text-gray-400">Use <span className="text-blue-400 font-mono">[LEFT/RIGHT]</span> to navigate the organic corridor.</p>
-            </div>
+          <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-left">
+            <p className="text-xs font-bold text-blue-400 uppercase mb-1">Steer</p>
+            <p className="text-sm text-gray-400">
+              Use <span className="text-white font-mono bg-white/10 px-1 rounded">←</span> <span className="text-white font-mono bg-white/10 px-1 rounded">→</span> arrows
+            </p>
           </div>
         </div>
 
+        {/* Start Button */}
         <button
           onClick={onStart}
-          className="group relative flex items-center justify-center w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xl rounded-full transition-all active:scale-95 overflow-hidden"
+          className="group w-full py-5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-rose-900/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
-          <Play className="mr-2 fill-current" /> START THE RACE
+          <Play className="fill-current" size={20} />
+          START
         </button>
       </div>
-
-
-
-      <style>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 };

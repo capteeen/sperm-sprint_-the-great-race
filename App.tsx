@@ -6,6 +6,8 @@ import { StartScreen } from './components/StartScreen';
 import { GameState } from './types';
 import { SPERM_NAMES } from './data/names';
 
+import { LandingPage } from './components/LandingPage';
+
 const TOTAL_PARTICIPANTS = 100;
 
 // Generate a random player name
@@ -30,6 +32,7 @@ const getInitialState = (): GameState => ({
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>(getInitialState);
+  const [showLanding, setShowLanding] = useState(true);
 
   const handleStart = useCallback(() => {
     setGameState(prev => ({
@@ -55,11 +58,16 @@ export default function App() {
       ...getInitialState(),
       playerName: prev.playerName, // Keep the custom name they chose
     }));
+    setShowLanding(true);
   }, []);
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden select-none">
-      {!gameState.isRacing && !gameState.isFinished && (
+    <div className={`relative w-full ${showLanding ? 'min-h-screen' : 'h-screen overflow-hidden'} bg-black select-none`}>
+      {showLanding && !gameState.isRacing && !gameState.isFinished && (
+        <LandingPage onPlay={() => setShowLanding(false)} />
+      )}
+
+      {!showLanding && !gameState.isRacing && !gameState.isFinished && (
         <StartScreen
           onStart={handleStart}
           playerName={gameState.playerName}
