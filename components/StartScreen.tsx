@@ -5,20 +5,29 @@ import { Play, Info } from 'lucide-react';
 interface Props {
   onStart: () => void;
   playerName: string;
+  onNameChange: (name: string) => void;
 }
 
-export const StartScreen: React.FC<Props> = ({ onStart, playerName }) => {
+export const StartScreen: React.FC<Props> = ({ onStart, playerName, onNameChange }) => {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/80 backdrop-blur-md">
-      <div className="max-w-md text-center p-8 border border-red-900/50 rounded-3xl bg-gradient-to-b from-red-950/20 to-black">
+      <div className="max-w-md text-center p-8 border border-red-900/50 rounded-3xl bg-gradient-to-b from-red-950/20 to-black shadow-[0_0_50px_rgba(153,27,27,0.3)]">
         <h1 className="text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-white pulse-text italic">
           SPERM SPRINT
         </h1>
 
-        {/* Player Identity */}
-        <div className="mb-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
-          <span className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Racing As</span>
-          <span className="text-lg font-bold text-cyan-400">{playerName}</span>
+        {/* Player Identity Input */}
+        <div className="mb-6 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl group focus-within:border-cyan-500/50 transition-all duration-300">
+          <label className="text-[10px] text-cyan-500/50 uppercase tracking-[0.2em] block mb-2 font-bold">Your Bio-Identity</label>
+          <input
+            type="text"
+            value={playerName}
+            onChange={(e) => onNameChange(e.target.value)}
+            className="w-full bg-transparent text-2xl font-black text-cyan-400 text-center outline-none placeholder:text-cyan-900/30 selection:bg-cyan-500/30"
+            placeholder="Enter Name..."
+            maxLength={20}
+          />
+          <div className="h-px w-0 group-focus-within:w-full bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent transition-all duration-500 mt-2 mx-auto" />
         </div>
 
         <p className="text-gray-400 mb-8 text-lg">

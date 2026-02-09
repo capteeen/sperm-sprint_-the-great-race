@@ -51,16 +51,20 @@ export default function App() {
   }, []);
 
   const handleReset = useCallback(() => {
-    setGameState({
+    setGameState(prev => ({
       ...getInitialState(),
-      playerName: getRandomPlayerName(), // New name each game
-    });
+      playerName: prev.playerName, // Keep the custom name they chose
+    }));
   }, []);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden select-none">
       {!gameState.isRacing && !gameState.isFinished && (
-        <StartScreen onStart={handleStart} playerName={gameState.playerName} />
+        <StartScreen
+          onStart={handleStart}
+          playerName={gameState.playerName}
+          onNameChange={(name) => updateGameState({ playerName: name })}
+        />
       )}
 
       {(gameState.isRacing || gameState.isFinished) && (
