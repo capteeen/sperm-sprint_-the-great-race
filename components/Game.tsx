@@ -105,8 +105,14 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       if (isForwardKey(e)) {
         e.preventDefault(); // Prevent page scrolling
+        e.stopPropagation();
         const now = Date.now();
         if (now - lastTapRef.current > TAP_COOLDOWN) {
           const diff = now - lastTapRef.current;
@@ -121,19 +127,26 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
           lastTapRef.current = now;
         }
       }
-      if (isLeftKey(e)) steerRef.current = -1;
-      if (isRightKey(e)) steerRef.current = 1;
+      if (isLeftKey(e)) {
+        e.preventDefault();
+        steerRef.current = -1;
+      }
+      if (isRightKey(e)) {
+        e.preventDefault();
+        steerRef.current = 1;
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (isLeftKey(e) || isRightKey(e)) steerRef.current = 0;
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Use document with capture phase for more reliable event handling
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+    document.addEventListener('keyup', handleKeyUp, { capture: true });
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown, { capture: true });
+      document.removeEventListener('keyup', handleKeyUp, { capture: true });
     };
   }, [onUpdate]);
 
@@ -255,16 +268,41 @@ export const Game: React.FC<Props> = (props) => {
 
   // Auto-focus the container when the game starts to ensure keyboard events work
   useEffect(() => {
+    const focusContainer = () => {
+      if (containerRef.current) {
+        containerRef.current.focus();
+      }
+    };
+
+    // Focus immediately and after a short delay (for production builds with async loading)
+    focusContainer();
+    const timer1 = setTimeout(focusContainer, 100);
+    const timer2 = setTimeout(focusContainer, 500);
+
+    // Also focus when window regains focus
+    window.addEventListener('focus', focusContainer);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      window.removeEventListener('focus', focusContainer);
+    };
+  }, []);
+
+  const handleInteraction = () => {
     if (containerRef.current) {
       containerRef.current.focus();
     }
-  }, []);
+  };
 
   return (
     <div
       ref={containerRef}
       className="absolute inset-0 outline-none"
       tabIndex={0}
+      onClick={handleInteraction}
+      onPointerDown={handleInteraction}
+      onTouchStart={handleInteraction}
     >
       <Canvas gl={{ antialias: true }} dpr={[1, 2]}>
         <ambientLight intensity={0.3} />
