@@ -8,6 +8,7 @@ import { PlayerSperm } from './Sperm';
 import { CompetitorSperm } from './CompetitorSperm';
 import { ObstacleItem } from './Obstacle';
 import { GameState, Competitor, Obstacle, ZoneType } from '../types';
+import { getRandomNames } from '../data/names';
 
 interface Props {
   gameState: GameState;
@@ -39,10 +40,11 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
   const { camera } = useThree();
 
   useEffect(() => {
-    // Generate competitors
+    // Generate competitors with random names
+    const randomNames = getRandomNames(15);
     const initialComps = Array.from({ length: 15 }).map((_, i) => ({
       id: `comp-${i}`,
-      name: `Rival ${i}`,
+      name: randomNames[i],
       distance: Math.random() * 5,
       velocity: 0.15 + Math.random() * 0.25,
       offset: [(Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8] as [number, number],
@@ -124,7 +126,7 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     for (const obs of obstacles) {
       if (Math.abs(obs.distance - newDist) < 1.2) {
         const dist2D = Math.sqrt(
-          Math.pow(playerXRef.current - obs.position[0], 2) + 
+          Math.pow(playerXRef.current - obs.position[0], 2) +
           Math.pow(playerYRef.current - obs.position[1], 2)
         );
         if (dist2D < obs.size + COLLISION_RADIUS) {
@@ -135,7 +137,7 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
 
     // Zone Transition
     const currentZone = getZoneFromDistance(newDist);
-    
+
     // Camera: "Up View"
     const camTargetX = playerXRef.current * 0.5;
     const camTargetY = playerYRef.current + 6;
@@ -156,11 +158,13 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       .sort((a, b) => b.distance - a.distance);
     const myRank = sorted.findIndex(x => x.id === 'player') + 1;
 
-    onUpdate({ 
-      velocity: newVel, 
-      distance: newDist, 
+    onUpdate({
+      velocity: newVel,
+      distance: newDist,
       rank: myRank + 99999980,
-      currentZone
+      currentZone,
+      competitors: updatedComps,
+      raceTime: gameState.raceTime + 0.016, // ~60fps
     });
 
     if (newDist > RACE_LENGTH) onFinish();
@@ -172,33 +176,33 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       <ambientLight intensity={0.5} />
       <pointLight position={[0, 10, -gameState.distance]} color="#ffffff" intensity={1.5} />
       <fog attach="fog" args={['#050005', 15, 85]} />
-      
+
       <Stars radius={150} depth={50} count={4000} factor={4} speed={1} />
-      
+
       <Tunnel length={RACE_LENGTH} currentZone={gameState.currentZone} />
-      
+
       {obstacles.map(obs => (
         Math.abs(obs.distance - gameState.distance) < 100 && (
-          <ObstacleItem 
-            key={obs.id} 
-            position={[obs.position[0], obs.position[1], -obs.distance]} 
-            size={obs.size} 
-            type={obs.type} 
+          <ObstacleItem
+            key={obs.id}
+            position={[obs.position[0], obs.position[1], -obs.distance]}
+            size={obs.size}
+            type={obs.type}
           />
         )
       ))}
 
-      <PlayerSperm 
-        position={[playerXRef.current, playerYRef.current, -gameState.distance]} 
-        velocity={gameState.velocity} 
+      <PlayerSperm
+        position={[playerXRef.current, playerYRef.current, -gameState.distance]}
+        velocity={gameState.velocity}
       />
-      
+
       {competitors.map(c => (
         Math.abs(c.distance - gameState.distance) < 70 && (
-          <CompetitorSperm 
-            key={c.id} 
-            position={[c.offset[0], c.offset[1], -c.distance]} 
-            color={c.color} 
+          <CompetitorSperm
+            key={c.id}
+            position={[c.offset[0], c.offset[1], -c.distance]}
+            color={c.color}
             velocity={c.velocity}
           />
         )
@@ -207,10 +211,10 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
       {/* The Goal: Massive Egg */}
       <mesh position={[0, 0, -RACE_LENGTH - 25]}>
         <sphereGeometry args={[22, 64, 64]} />
-        <meshStandardMaterial 
-          color="#ffffff" 
-          emissive="#ffffcc" 
-          emissiveIntensity={3} 
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffcc"
+          emissiveIntensity={3}
           roughness={0}
           metalness={0.8}
         />

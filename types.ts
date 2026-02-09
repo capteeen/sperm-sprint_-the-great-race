@@ -10,6 +10,9 @@ export interface GameState {
   isFinished: boolean;
   rhythmScore: number;
   currentZone: ZoneType;
+  competitors: Competitor[];
+  playerName: string;
+  raceTime: number;
 }
 
 export interface Competitor {

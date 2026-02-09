@@ -1,0 +1,73 @@
+// Funny random sperm names for fake multiplayer
+export const SPERM_NAMES = [
+    "SwiftSwimmer69",
+    "TailWhip_Pro",
+    "SpeedyGonzales",
+    "NucleusKing",
+    "FlagellumFury",
+    "MitoMaster",
+    "CellularChamp",
+    "DNA_Destroyer",
+    "ChromoChaser",
+    "GenomeGod",
+    "xX_Fertilizer_Xx",
+    "EggHunter2000",
+    "TheChosenOne",
+    "LastManSwimming",
+    "TurboTail",
+    "AcidSurvivor",
+    "CervixCrusher",
+    "UterusNavigator",
+    "TubeRacer",
+    "SprintMaster",
+    "WiggleKing",
+    "FastAndFertile",
+    "HeadFirst",
+    "NoobSlayer_99",
+    "ProGamer_XD",
+    "SwimOrDie",
+    "MotilityMax",
+    "CapacitatedKing",
+    "AcrosomeAce",
+    "ZonaPellucida",
+    "MorphologyMVP",
+    "CountChampion",
+    "ViabilityVIP",
+    "ProgressivePro",
+    "ConcentrationKing",
+    "ReproductiveRex",
+    "GeneticGenius",
+    "CellDivider",
+    "MeiosisMaster",
+    "HaploidHero",
+    "23Chromosomes",
+    "SemenDemon",
+    "LittleSwimmer",
+    "Tadpole_Tim",
+    "WigglyBoi",
+    "SpermWhale",
+    "MicroMover",
+    "NanoRacer",
+    "CytoplasmKid",
+    "MembraneMan",
+];
+
+// Generate a random selection of names for competitors
+export const getRandomNames = (count: number): string[] => {
+    const shuffled = [...SPERM_NAMES].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+};
+
+// Fake leaderboard data with historical "players"
+export const FAKE_LEADERBOARD = [
+    { name: "xX_Fertilizer_Xx", time: 45.2, rank: 1 },
+    { name: "TheChosenOne", time: 48.7, rank: 2 },
+    { name: "SwiftSwimmer69", time: 52.1, rank: 3 },
+    { name: "TailWhip_Pro", time: 55.4, rank: 4 },
+    { name: "MitoMaster", time: 58.9, rank: 5 },
+    { name: "GenomeGod", time: 61.3, rank: 6 },
+    { name: "SpeedyGonzales", time: 64.8, rank: 7 },
+    { name: "DNA_Destroyer", time: 67.2, rank: 8 },
+    { name: "TurboTail", time: 70.5, rank: 9 },
+    { name: "EggHunter2000", time: 73.1, rank: 10 },
+];

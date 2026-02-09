@@ -4,15 +4,23 @@ import { Play, Info } from 'lucide-react';
 
 interface Props {
   onStart: () => void;
+  playerName: string;
 }
 
-export const StartScreen: React.FC<Props> = ({ onStart }) => {
+export const StartScreen: React.FC<Props> = ({ onStart, playerName }) => {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/80 backdrop-blur-md">
       <div className="max-w-md text-center p-8 border border-red-900/50 rounded-3xl bg-gradient-to-b from-red-950/20 to-black">
         <h1 className="text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-400 to-white pulse-text italic">
           SPERM SPRINT
         </h1>
+
+        {/* Player Identity */}
+        <div className="mb-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
+          <span className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Racing As</span>
+          <span className="text-lg font-bold text-cyan-400">{playerName}</span>
+        </div>
+
         <p className="text-gray-400 mb-8 text-lg">
           Outswim 99 million competitors in a pulse-pounding biological race. Only the fastest survives.
         </p>
@@ -46,7 +54,7 @@ export const StartScreen: React.FC<Props> = ({ onStart }) => {
           <Play className="mr-2 fill-current" /> START THE RACE
         </button>
       </div>
-      
+
       <div className="mt-8 flex gap-4 text-gray-500">
         <div className="flex items-center gap-1 text-xs uppercase tracking-widest">
           <Info size={14} /> Powered by Gemini AI Announcer

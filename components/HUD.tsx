@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Trophy, Zap, Map as MapIcon, RotateCcw, Activity } from 'lucide-react';
+import { Trophy, Zap, Map as MapIcon, RotateCcw, Activity, Clock } from 'lucide-react';
 import { GameState, ZoneType } from '../types';
 import { Commentary } from './Commentary';
+import { Leaderboard } from './Leaderboard';
 
 interface Props {
   gameState: GameState;
@@ -45,7 +46,7 @@ export const HUD: React.FC<Props> = ({ gameState, onReset }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-red-600/20 border border-red-500/30 px-4 py-2 rounded-xl backdrop-blur-md self-start">
             <span className="text-xs font-black uppercase text-red-400 flex items-center gap-2">
               <Activity size={14} className="animate-pulse" />
@@ -55,7 +56,18 @@ export const HUD: React.FC<Props> = ({ gameState, onReset }) => {
         </div>
 
         <div className="flex flex-col items-end gap-2">
-           <Commentary gameState={gameState} />
+          <Commentary gameState={gameState} />
+
+          {/* Live Leaderboard */}
+          {gameState.competitors.length > 0 && (
+            <Leaderboard
+              competitors={gameState.competitors}
+              playerDistance={gameState.distance}
+              playerName={gameState.playerName}
+              isFinished={gameState.isFinished}
+              raceTime={gameState.raceTime}
+            />
+          )}
         </div>
       </div>
 
@@ -67,8 +79,28 @@ export const HUD: React.FC<Props> = ({ gameState, onReset }) => {
               LIFE BEGUN!
             </h2>
             <p className="text-2xl text-white font-bold mb-2">You outran 100 million rivals.</p>
-            <p className="text-gray-400 mb-8">Final Rank: #{gameState.rank.toLocaleString()}</p>
-            <button 
+            <div className="flex items-center justify-center gap-4 text-gray-400 mb-4">
+              <span>Final Rank: #{gameState.rank.toLocaleString()}</span>
+              <span className="flex items-center gap-1">
+                <Clock size={14} />
+                Time: {gameState.raceTime.toFixed(1)}s
+              </span>
+            </div>
+
+            {/* Final Leaderboard */}
+            {gameState.competitors.length > 0 && (
+              <div className="mb-6">
+                <Leaderboard
+                  competitors={gameState.competitors}
+                  playerDistance={gameState.distance}
+                  playerName={gameState.playerName}
+                  isFinished={true}
+                  raceTime={gameState.raceTime}
+                />
+              </div>
+            )}
+
+            <button
               onClick={onReset}
               className="flex items-center gap-2 mx-auto px-10 py-5 bg-yellow-500 text-black font-black text-2xl rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
@@ -85,7 +117,7 @@ export const HUD: React.FC<Props> = ({ gameState, onReset }) => {
             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Full Biological Map</span>
             <span className="text-sm font-black text-white italic">{Math.floor(progress)}% Progress</span>
           </div>
-          
+
           <div className="relative h-10 w-full bg-white/5 rounded-2xl border border-white/10 overflow-hidden flex">
             {/* Zone Markers */}
             <div className="absolute inset-0 flex">
@@ -96,25 +128,25 @@ export const HUD: React.FC<Props> = ({ gameState, onReset }) => {
             </div>
 
             {/* Progress Fill */}
-            <div 
-              className="h-full bg-gradient-to-r from-red-600 via-pink-500 to-cyan-400 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] relative z-10" 
+            <div
+              className="h-full bg-gradient-to-r from-red-600 via-pink-500 to-cyan-400 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] relative z-10"
               style={{ width: `${progress}%` }}
             >
-               {/* Animated Head Pin */}
-               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_15px_#fff] border-2 border-black" />
+              {/* Animated Head Pin */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_15px_#fff] border-2 border-black" />
             </div>
           </div>
-          
+
           <div className="flex justify-between mt-2 px-2">
             <div className="flex gap-4 items-center">
-               <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                  <span className="w-2 h-2 rounded-full bg-red-500" /> START
-               </div>
-               <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_cyan]" /> THE EGG
-               </div>
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                <span className="w-2 h-2 rounded-full bg-red-500" /> START
+              </div>
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_cyan]" /> THE EGG
+              </div>
             </div>
-            
+
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-black italic text-white leading-none">
                 {Math.floor(gameState.velocity * 1000)}
