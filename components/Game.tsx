@@ -95,8 +95,8 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     if (input.left) steer = -1;
     if (input.right) steer = 1;
 
-    // Handle forward boost from global input
-    if (input.forward && input.lastTap > lastProcessedTapRef.current) {
+    // Handle forward boost from global input - process whenever a new tap occurred
+    if (input.lastTap > lastProcessedTapRef.current) {
       const now = input.lastTap;
       const diff = now - lastProcessedTapRef.current;
 
@@ -108,7 +108,8 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
         } else {
           onUpdate({ rhythmScore: Math.max(0, rhythmRef.current - 6) });
         }
-        onUpdate({ velocity: Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier) });
+        // Apply boost directly to velocityRef (not via onUpdate to avoid race condition)
+        velocityRef.current = Math.min(MAX_VEL, velocityRef.current + ACCEL * multiplier);
         lastProcessedTapRef.current = now;
       }
     }
@@ -118,7 +119,8 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
     playerXRef.current *= 0.95;
     playerYRef.current = Math.sin(gameState.distance * 0.04) * 0.6;
 
-    let newVel = gameState.velocity * FRICTION;
+    // Use velocityRef as source of truth (it includes boosts applied this frame)
+    let newVel = velocityRef.current * FRICTION;
     const newDist = gameState.distance + newVel;
 
     // Collisions
