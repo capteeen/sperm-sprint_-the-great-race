@@ -251,8 +251,21 @@ const Scene: React.FC<Props> = ({ gameState, onUpdate, onFinish }) => {
 };
 
 export const Game: React.FC<Props> = (props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-focus the container when the game starts to ensure keyboard events work
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.focus();
+    }
+  }, []);
+
   return (
-    <div className="absolute inset-0">
+    <div
+      ref={containerRef}
+      className="absolute inset-0 outline-none"
+      tabIndex={0}
+    >
       <Canvas gl={{ antialias: true }} dpr={[1, 2]}>
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={0.5} />
