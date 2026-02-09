@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { PerspectiveCamera, Stars, Environment, Sparkles } from '@react-three/drei';
+import { PerspectiveCamera, Stars, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { Tunnel } from './Tunnel';
 import { PlayerSperm } from './Sperm';
@@ -228,8 +228,9 @@ export const Game: React.FC<Props> = (props) => {
   return (
     <div className="absolute inset-0">
       <Canvas gl={{ antialias: true }} dpr={[1, 2]}>
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[10, 10, 5]} intensity={0.5} />
         <Scene {...props} />
-        <Environment preset="night" />
       </Canvas>
     </div>
   );
